@@ -1,0 +1,35 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(build.SourcesDirectory)'
+    Contents: |
+      **
+      !**/.git/**
+      !**/.gitignore
+      !**/azure-pipelines.yml
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/upload/'
+
+- task: FtpUpload@2
+  inputs:
+    credentialsOption: 'inputs'
+    serverUrl: '$(Ftp.ServerUrl)'
+    username: '$(Ftp.Username)'
+    password: '$(Ftp.Password)'
+    rootDirectory: '$(build.ArtifactStagingDirectory)/upload/'
+    filePatterns: '**'
+    remoteDirectory: '$(Ftp.RemoteDirectory)'
+    clean: false
+    cleanContents: true
+    preservePaths: true
+    trustSSL: false
